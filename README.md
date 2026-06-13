@@ -107,7 +107,6 @@ Note: Spatial distance calculations were performed in QGIS and exported as CSV i
 
 ---
 
-## Author
+**Matthew Ong · Real Estate & Economic Analysis**
 
-Matthew Ong
-mong01@tamu.edu
+[LinkedIn](https://linkedin.com/in/matthewong01) · [GitHub](https://github.com/matthewong01)
