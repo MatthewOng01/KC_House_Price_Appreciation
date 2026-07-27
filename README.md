@@ -36,6 +36,7 @@ Full derivations and discussion are in the [writeup](https://matthewong01.github
 - `data/` — source datasets
 - `tables/` — HTML table outputs, embedded in the writeup
 - `figures/` — exported PNG figures, embedded in the writeup
+- `weights_matrix_2012.csv` — Full Queen's Weight Matrix used for spatial autocorrelation testing
 
 ## Reproducing
 
