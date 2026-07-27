@@ -1,109 +1,57 @@
-# Price-Tier Convergence and Spatial Housing Appreciation: Evidence from the Kansas City MSA
+# KC Housing Price Appreciation
 
-## Project Overview
+Beta and sigma convergence analysis of home prices across Kansas City MSA ZIP codes, 2000–2026.
 
-This project analyzes 5-year cumulative home price appreciation across ZIP codes in the Kansas City Metropolitan Statistical Area (MSA).
+**[Full Report](https://matthewong01.github.io/kc-housing-appreciation/writeup)** · **[Interactive Map](https://matthewong01.github.io/kc-housing-appreciation/map/)** · **[Dashboard](https://matthewong01.github.io/kc-housing-appreciation/dashboard)**
 
-Using spatial distance metrics and econometric modeling, the analysis quantifies how proximity to major commercial hubs influences residential asset appreciation and identifies areas outperforming traditional urban core trends.
+## Overview
 
-The objective is to translate spatial economic analysis into actionable insight for real estate development, asset management, and urban planning.
+This project tests whether lower-priced ZIP codes in the Kansas City metro are catching up in price to higher-priced ones (beta convergence), and whether the overall spread in prices across the metro is narrowing over time (sigma convergence). The analysis is corrected for spatial autocorrelation using a Spatial Error Model, identified through Moran's I and Lagrange Multiplier diagnostics.
 
----
+**Key findings:**
+- Lower-priced ZIP codes converge toward higher-priced ones at roughly 3% per year, a rate stable since 2012
+- Price dispersion narrowed overall, but reversed 2007–2014 during the foreclosure crisis
+- Appreciation clusters geographically (Moran's I = 0.632), so comps should be pulled by radius rather than restricted to a single ZIP code
 
-## Tools Used
+## Data
 
-- **SAS** – Data cleaning and ZIP code filtering  
-- **QGIS** – Spatial distance computation to major points of interest  
-- **R** – Regression modeling, visualization, and statistical diagnostics  
+| Dataset | Source | Coverage |
+|---|---|---|
+| Home Value Index (ZHVI) | Zillow | 2000–2026, ZIP-level |
+| American Community Survey | US Census Bureau | 2024 five-year estimate |
 
----
+Raw files are in `data/`. `target_zips.csv` is the crosswalk used to filter Zillow's national dataset down to Kansas City MSA ZIP codes.
 
-## Methodology
+## Method
 
-### 1. Price Appreciation Metric
+- OLS beta convergence regressions across four study windows (2001–2026, 2012–2026, 2018–2026, 2020–2026), with coefficients annualized via the Barro & Sala-i-Martin transformation for cross-period comparability
+- Sigma convergence tracked via the standard deviation of log home prices by year, with linear trends fit within three identified regimes
+- Spatial autocorrelation tested via Moran's I and robust Lagrange Multiplier diagnostics on a Queen contiguity weights matrix; corrected using a Spatial Error Model (`spatialreg::errorsarlm`)
 
-5-year cumulative price appreciation is measured using log price change:
+Full derivations and discussion are in the [writeup](https://matthewong01.github.io/kc-housing-appreciation/writeup).
 
-Price Appreciation = ln(P_final) − ln(P_initial)
+## Repo structure
 
-This formulation allows interpretation in approximate percentage terms while reducing skewness in housing price distributions.
+- `analysis.R` — full analysis pipeline, run top to bottom
+- `data/` — source datasets
+- `tables/` — HTML table outputs, embedded in the writeup
+- `figures/` — exported PNG figures, embedded in the writeup
 
----
+## Reproducing
 
-### 2. Spatial Variables
+```r
+install.packages(c("tidyverse", "readr", "janitor", "tigris", "sf", "broom",
+                    "gt", "stargazer", "spdep", "spatialreg", "knitr", "kableExtra"))
+source("analysis.R")
+```
 
-Distances were computed from ZIP-code centroids to major Points of Intrest (POIs), including:
+## Limitations
 
-- The Plaza  
-- Power & Light District  
-- The Legends
-- MCI Airport
-- Lee's Summit
-
-An “Urban Core Distance” metric was constructed as:
-
-UrbanCoreDist = (DistanceToPlaza + DistanceToPowerLight) / 2
-
-This captures compounded centrality relative to Kansas City's traditional commercial core.
-
----
-
-### 3. Econometric Specification
-
-Baseline model:
-
-Appreciation_i = β0 + β1 Distance_i + ε_i
-
-Extended specifications include:
-
-- Urban core distance  
-- Interaction term: Urban core distance + log(initial price)  
-- Diagnostic checks for heteroskedasticity and multicollinearity  
+ZIP codes missing from earlier study periods are disproportionately low-value, low-turnover markets, which may bias early-period convergence estimates downward. This is an unconditional convergence test; no causal inference is drawn. See the [writeup](https://matthewong01.github.io/kc-housing-appreciation/writeup#limitations) for the full discussion.
 
 ---
 
-## Key Findings
-### Stronger Suburban Appreciation
-Peripheral ZIP codes exhibit stronger 5-year price appreciation relative to the urban core.
-![Price Appreciation Map](figures/price_appreciation_map.png)
-
-### Interaction Effects: Initial Price × Urban Core Distance
-The interaction model tests whether the effect of distance varies across price tiers. Results indicate that baseline price segmentation—not urban centrality—is the primary driver of five-year appreciation. The interaction term is statistically significant but economically small, reinforcing that proportional catch-up among lower-priced ZIP codes explains most observed growth patterns.
-![Urban Core Regression Results](tables/interaction.png)
-
-### Full Model Results
-The preferred specification explains approximately 35% of cross-sectional variation in five-year appreciation (R² ≈ 0.34).
-The dominant result is clear: lower-priced ZIP codes appreciated faster over 2021–2026, consistent with β-convergence dynamics. Distance from the historic urban core has negligible practical impact once baseline price tier is accounted for.
-![Full Model Regression Results](tables/fullmodel.png)
-
----
-
-## Investment & Planning Implications
-
-- **Developers / Asset Managers:** Peripheral ZIP codes may present under-recognized appreciation opportunities.  
-- **Urban Planners / Local Government:** Rapid outer-rim appreciation may warrant strategic infrastructure and zoning attention.  
-- **Market Analysts:** Spatial econometrics provides measurable evidence of location-driven capital appreciation.  
-
----
-
-## Repository Structure
-
-/data        → Input datasets  
-/scripts     → SAS data cleaning and Regression and visualization scripts
-/figures     → Maps and output visualizations  
-
----
-
-## Replication Notes
-
-1. Place all CSV files inside the `/data` folder.  
-2. Set your SAS or R working directory to the project root.  
-3. Run scripts in order:
-   - SAS (data cleaning)  
-   - QGIS (distance computation)  
-   - R (regression and visualization)  
-
-Note: Spatial distance calculations were performed in QGIS and exported as CSV inputs for regression analysis.
+Matthew Ong · [Portfolio](https://matthewong01.github.io) · [LinkedIn](https://linkedin.com/in/matthewong01)
 
 ---
 
